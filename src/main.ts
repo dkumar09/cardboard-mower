@@ -4,10 +4,10 @@ import Grid from "./lib/grid"
 const canvas = new Canvas(document.querySelector("canvas")!);
 const [WIDTH, HEIGHT] = canvas.dimensions();
 canvas.clear()
-const res = 10
+const res = 5
 const grid = new Grid(10 * res, 10 * res);
 
-const circles = [[100, 100, 30], [200, 200, 30], [100, 140, 40]];
+const circles = [[100, 100, 50], [200, 200, 30], [100, 140, 50]];
 const vel = [[0.2, 0.1], [-0.2, -0.2], [-0.2, -0.3]];
 const MAG = 1
 
@@ -38,11 +38,13 @@ const updatePos = (circles: number[][]) => {
     circles.forEach((_, idx) => {
         circles[idx][0] += vel[idx][0] * MAG
         circles[idx][1] += vel[idx][1] * MAG
-        if (circles[idx][0] >= WIDTH || circles[idx][0] <= 0) vel[idx][0] = -vel[idx][0]
-        if (circles[idx][1] >= HEIGHT || circles[idx][1] <= 0) vel[idx][1] = -vel[idx][1]
+        const radius = circles[idx][2]
+        if (circles[idx][0] >= WIDTH - radius || circles[idx][0] <= radius) vel[idx][0] = -vel[idx][0]
+        if (circles[idx][1] >= HEIGHT - radius || circles[idx][1] <= radius) vel[idx][1] = -vel[idx][1]
     })
 }
-const drawContours = (pos: string, i: number, j: number, grid: number[][]) => {
+const drawContours = (i: number, j: number, grid: number[][]) => {
+    const pos = `${Number(grid[i][j] >= 1)}${Number(grid[i][j + 1] >= 1)}${Number(grid[i + 1][j + 1] >= 1)}${Number(grid[i + 1][j] >= 1)}`
     const rowHeight = HEIGHT / grid.length;
     const colWidth = WIDTH / grid[0].length;
     switch (pos) {
@@ -96,15 +98,139 @@ const drawContours = (pos: string, i: number, j: number, grid: number[][]) => {
             break;
     }
 }
+
+const drawContoursInterpolate = (i: number, j: number, grid: number[][]) => {
+    const pos = `${Number(grid[i][j] >= 1)}${Number(grid[i][j + 1] >= 1)}${Number(grid[i + 1][j + 1] >= 1)}${Number(grid[i + 1][j] >= 1)}`
+    const rowHeight = HEIGHT / grid.length;
+    const colWidth = WIDTH / grid[0].length;
+
+    switch (pos) {
+        case '0000':
+            break;
+        case '0001':
+            {
+                let qy = (1 - grid[i][j]) / (grid[i + 1][j] - grid[i][j]);
+                let px = (1 - grid[i + 1][j]) / (grid[i + 1][j + 1] - grid[i + 1][j]);
+                canvas.line(j * colWidth, (i + qy) * rowHeight, (j + px) * colWidth, (i + 1) * rowHeight)
+            }
+            break;
+        case '0010':
+            {
+                let qy = (1 - grid[i][j + 1]) / (grid[i + 1][j + 1] - grid[i][j + 1]);
+                let px = (1 - grid[i + 1][j]) / (grid[i + 1][j + 1] - grid[i + 1][j]);
+                canvas.line((j + px) * colWidth, (i + 1) * rowHeight, (j + 1) * colWidth, (i + qy) * rowHeight)
+            }
+            break;
+        case '0011':
+            {
+                let qy = (1 - grid[i][j + 1]) / (grid[i + 1][j + 1] - grid[i][j + 1]);
+                let px = (1 - grid[i][j]) / (grid[i + 1][j] - grid[i][j]);
+                canvas.line(j * colWidth, (i + px) * rowHeight, (j + 1) * colWidth, (i + qy) * rowHeight)
+            }
+            break;
+        case '0100':
+            {
+                let qy = (1 - grid[i][j + 1]) / (grid[i + 1][j + 1] - grid[i][j + 1]);
+                let px = (1 - grid[i][j]) / (grid[i][j + 1] - grid[i][j]);
+                canvas.line((j + px) * colWidth, (i) * rowHeight, (j + 1) * colWidth, (i + qy) * rowHeight)
+            }
+            break;
+        case '0101':
+            {
+                let qy = (1 - grid[i][j]) / (grid[i + 1][j] - grid[i][j]);
+                let px = (1 - grid[i][j]) / (grid[i][j + 1] - grid[i][j]);
+                canvas.line((j) * colWidth, (i + qy) * rowHeight, (j + px) * colWidth, (i) * rowHeight)
+            }
+            {
+                let qy = (1 - grid[i][j + 1]) / (grid[i + 1][j + 1] - grid[i][j + 1]);
+                let px = (1 - grid[i + 1][j]) / (grid[i + 1][j + 1] - grid[i + 1][j]);
+                canvas.line((j + px) * colWidth, (i + 1) * rowHeight, (j + 1) * colWidth, (i + qy) * rowHeight)
+            }
+            break;
+        case '0110':
+            {
+                let qy = (1 - grid[i + 1][j]) / (grid[i + 1][j + 1] - grid[i + 1][j]);
+                let px = (1 - grid[i][j]) / (grid[i][j + 1] - grid[i][j]);
+                canvas.line((j + px) * colWidth, (i) * rowHeight, (j + qy) * colWidth, (i + 1) * rowHeight)
+            }
+            break;
+        case '0111':
+            {
+                let qy = (1 - grid[i][j]) / (grid[i + 1][j] - grid[i][j]);
+                let px = (1 - grid[i][j]) / (grid[i][j + 1] - grid[i][j]);
+                canvas.line((j) * colWidth, (i + qy) * rowHeight, (j + px) * colWidth, (i) * rowHeight)
+            }
+            break;
+        case '1000':
+            {
+                let qy = (1 - grid[i][j]) / (grid[i + 1][j] - grid[i][j]);
+                let px = (1 - grid[i][j]) / (grid[i][j + 1] - grid[i][j]);
+                canvas.line((j) * colWidth, (i + qy) * rowHeight, (j + px) * colWidth, (i) * rowHeight)
+            }
+            break;
+        case '1001':
+            {
+                let qy = (1 - grid[i + 1][j]) / (grid[i + 1][j + 1] - grid[i + 1][j]);
+                let px = (1 - grid[i][j]) / (grid[i][j + 1] - grid[i][j]);
+                canvas.line((j + px) * colWidth, (i) * rowHeight, (j + qy) * colWidth, (i + 1) * rowHeight)
+            }
+            break;
+        case '1010':
+            {
+                let qy = (1 - grid[i][j + 1]) / (grid[i + 1][j + 1] - grid[i][j + 1]);
+                let px = (1 - grid[i][j]) / (grid[i][j + 1] - grid[i][j]);
+                canvas.line((j + px) * colWidth, (i) * rowHeight, (j + 1) * colWidth, (i + qy) * rowHeight)
+            }
+            {
+                let qy = (1 - grid[i][j]) / (grid[i + 1][j] - grid[i][j]);
+                let px = (1 - grid[i + 1][j]) / (grid[i + 1][j + 1] - grid[i + 1][j]);
+                canvas.line((j) * colWidth, (i + qy) * rowHeight, (j + px) * colWidth, (i + 1) * rowHeight)
+            }
+            break;
+        case '1011':
+            {
+                let qy = (1 - grid[i][j + 1]) / (grid[i + 1][j + 1] - grid[i][j + 1]);
+                let px = (1 - grid[i][j]) / (grid[i][j + 1] - grid[i][j]);
+                canvas.line((j + px) * colWidth, (i) * rowHeight, (j + 1) * colWidth, (i + qy) * rowHeight)
+            }
+            break;
+        case '1100':
+            {
+                let qy = (1 - grid[i][j + 1]) / (grid[i + 1][j + 1] - grid[i][j + 1]);
+                let px = (1 - grid[i][j]) / (grid[i + 1][j] - grid[i][j]);
+                canvas.line(j * colWidth, (i + px) * rowHeight, (j + 1) * colWidth, (i + qy) * rowHeight)
+            }
+            break;
+        case '1101':
+            {
+                let qy = (1 - grid[i][j + 1]) / (grid[i + 1][j + 1] - grid[i][j + 1]);
+                let px = (1 - grid[i + 1][j]) / (grid[i + 1][j + 1] - grid[i + 1][j]);
+                canvas.line((j + px) * colWidth, (i + 1) * rowHeight, (j + 1) * colWidth, (i + qy) * rowHeight)
+            }
+            break;
+        case '1110':
+            {
+                let qy = (1 - grid[i][j]) / (grid[i + 1][j] - grid[i][j]);
+                let px = (1 - grid[i + 1][j]) / (grid[i + 1][j + 1] - grid[i + 1][j]);
+                canvas.line(j * colWidth, (i + qy) * rowHeight, (j + px) * colWidth, (i + 1) * rowHeight)
+            }
+
+            break;
+        case '1111':
+            break;
+    }
+}
 const marchSquare = (grid: number[][]) => {
     for (let i = 0; i < grid.length - 1; i++) {
         for (let j = 0; j < grid[0].length - 1; j++) {
-            const pos = `${Number(grid[i][j] >= 1)}${Number(grid[i][j + 1] >= 1)}${Number(grid[i + 1][j + 1] >= 1)}${Number(grid[i + 1][j] >= 1)}`
-            drawContours(pos, i, j, grid)
+            // drawContours(i, j, grid)
+            drawContoursInterpolate(i, j, grid)
         }
     }
 
 }
+
+let shouldLoop = false
 
 function loop() {
     canvas.clear();
@@ -114,10 +240,16 @@ function loop() {
     updatePos(circles)
     // fillGrid(grid.grid, canvas)
     marchSquare(grid.grid)
+    // console.log(grid.grid)
     grid.reset()
     window.requestAnimationFrame(loop)
 }
 
+// document.addEventListener('click', () => {
+//     shouldLoop = !shouldLoop;
+//     if (shouldLoop)
+//         window.requestAnimationFrame(loop)
+// })
 window.requestAnimationFrame(loop)
 // canvas.clear();
 // canvas.drawGrid(grid.grid)
