@@ -8,8 +8,13 @@ class Grid {
         this.grid = Array.from(Array(rows), () => new Array(cols).fill(0));
         console.log('oni: init grid', this.grid)
     }
+    getGrid() {
+        return this.grid
+    }
     reset() {
-        this.grid = Array(10).fill(Array(10).fill(0))
+        this.grid.forEach(row => {
+            row.forEach((_, idx) => row[idx] = 0)
+        })
     }
 }
 

@@ -29,16 +29,30 @@ class Canvas {
         }
         this.ctx?.stroke();
     }
+
     circle([x, y, r]: number[]) {
         this.ctx?.beginPath()
         this.ctx?.arc(x, y, r, 0, Math.PI * 2);
         this.ctx?.stroke();
     }
+
     dimensions() {
         return [this.canvas.width, this.canvas.height]
     }
+
     rect(x: number, y: number, w: number, h: number) {
         this.ctx?.fillRect(x, y, w, h);
+    }
+
+    text(text: string, x: number, y: number) {
+        this.ctx?.fillText(text, x, y)
+    }
+
+    line(x1: number, y1: number, x2: number, y2: number) {
+        this.ctx?.beginPath()
+        this.ctx?.moveTo(x1, y1)
+        this.ctx?.lineTo(x2, y2)
+        this.ctx?.stroke()
     }
 
 }
