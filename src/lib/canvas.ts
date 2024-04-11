@@ -14,6 +14,20 @@ class Canvas {
         this.ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
+    fillPath(vertices: number[][]) {
+        if (vertices.length < 3) return;
+        this.ctx?.beginPath();
+        this.ctx?.moveTo(vertices[0][0], vertices[0][1])
+        vertices.forEach(vertex => this.ctx?.lineTo(vertex[0], vertex[1]))
+        this.ctx?.closePath();
+        this.ctx?.fill()
+    }
+
+    strokeColor(color: string) {
+        if (this.ctx)
+            this.ctx.strokeStyle = color
+    }
+
     drawGrid(grid: number[][]) {
         this.ctx?.beginPath();
         const rowHeight = this.canvas.height / grid.length;
