@@ -5,7 +5,35 @@ function init() {
     elementRef.width = window.innerWidth
     elementRef.height = window.innerHeight
     const canvas = new Canvas(elementRef!);
-    canvas.strokeColor('#00FF00')
+    let colorPointer = 0;
+    const colors = [
+        "#FF6600",
+        "#00FF00",
+        "#9900FF",
+        "#33FF00",
+        "#CC00FF",
+        "#0062FF",
+        "#FD1C03",
+        "#FFFF00",
+        "#E6FB04",
+        "#FFFF33",
+        "#9D00FF",
+        "#FF0099",
+        "#099FFF",
+        "#00FF33",
+        "#00FF66",
+        "#FF3300",
+        "#FF00FF",
+        "#FF00CC",
+        "#CC00FF",
+        "#6E0DD0",
+        "#FF0000",
+        "#00FFFF",
+        "#0033FF",
+        "#F2EA02",
+    ]
+
+    canvas.strokeColor(colors[colorPointer])
     const [WIDTH, HEIGHT] = canvas.dimensions();
     canvas.clear()
     const res = 20
@@ -15,7 +43,7 @@ function init() {
     const vel: number[][] = []
 
     for (let i = 0; i < 10; i++) {
-        circles.push([320, 320, 50 + Math.random() * 30])
+        circles.push([WIDTH / 2, HEIGHT / 2, 50 + Math.random() * 30])
         vel.push([Math.random() - 0.5, Math.random() - 0.5])
     }
 
@@ -51,11 +79,16 @@ function init() {
             const radius = circles[idx][2]
             if (circles[idx][0] >= WIDTH - radius || circles[idx][0] <= radius) {
                 vel[idx][0] = -vel[idx][0]
-                canvas.strokeColor("#FF0000")
+                colorPointer += 1
+                colorPointer %= colors.length
+                canvas.strokeColor(colors[colorPointer])
             }
             if (circles[idx][1] >= HEIGHT - radius || circles[idx][1] <= radius) {
                 vel[idx][1] = -vel[idx][1]
-                canvas.strokeColor("#0000FF")
+                colorPointer += 1
+                colorPointer %= colors.length
+                canvas.strokeColor("#F00000")
+                canvas.strokeColor(colors[colorPointer])
             }
         })
     }
@@ -254,8 +287,10 @@ function init() {
         // circles.forEach(circle => canvas.circle(circle));
         circles.forEach(circle => updateGridDistance(grid.grid, circle))
         updatePos(circles)
-        // fillGrid(grid.grid, canvas)
         marchSquare(grid.grid)
+        // temp resoultion of build error
+        false && fillGrid;
+        false && drawContours;
         // console.log(grid.grid)
         grid.reset()
         window.requestAnimationFrame(loop)
