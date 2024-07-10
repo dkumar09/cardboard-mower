@@ -27,6 +27,22 @@ class Canvas {
         if (this.ctx)
             this.ctx.strokeStyle = color
     }
+    getImageData(args?: [number, number, number, number]) {
+        if (!args) return this.ctx?.getImageData(0, 0, this.canvas.width, this.canvas.height)
+        if (args && args.length === 4) {
+            const [x, y, w, h] = args;
+            return this.ctx?.getImageData(x, y, w, h);
+        }
+        return null;
+    }
+
+    createImageData(w: number, h: number) {
+        return this.ctx?.createImageData(w, h)
+    }
+
+    putImageData(imageData: ImageData, x: number, y: number) {
+        this.ctx?.putImageData(imageData, x, y)
+    }
 
     drawGrid(grid: number[][]) {
         this.ctx?.beginPath();
